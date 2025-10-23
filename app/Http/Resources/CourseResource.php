@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\UserResource;
+
+class CourseResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'description' => $this->description,
+            'instructor' => new UserResource($this->whenLoaded('instructor')),
+            'category' => $this->when($this->relationLoaded('category') && $this->category, fn () => $this->category->name),
+            'students_count' => $this->whenLoaded('students', fn () => $this->students->count(), $this->students()->count()),
+            'created_at' => $this->created_at ? $this->created_at->format('Y-m-d') : null,
+            'updated_at' => $this->updated_at ? $this->updated_at->format('Y-m-d') : null,
+        ];
+    }
+}
