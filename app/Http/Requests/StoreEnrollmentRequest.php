@@ -14,6 +14,7 @@ class StoreEnrollmentRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'user_id' => 'required|exists:users,id',
             'course_id' => 'required|exists:courses,id',
             'status' => 'sometimes|string|in:enrolled,completed,dropped',
         ];

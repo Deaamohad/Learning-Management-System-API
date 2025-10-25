@@ -22,18 +22,14 @@ class EnrollmentController extends Controller
         $this->authorize('create', Enrollment::class);
         
         $existingEnrollment = Enrollment::where('user_id', auth()->id())
-            ->where('course_id', $request->course_id)
+            ->where('course_id', $request->validated()['course_id'])
             ->first();
             
         if ($existingEnrollment) {
             return response()->json(['message' => 'Already enrolled in this course'], 409);
         }
         
-        $enrollment = Enrollment::create([
-            'user_id' => auth()->id(),
-            'course_id' => $request->course_id,
-            'status' => $request->status ?? 'enrolled',
-        ]);
+        $enrollment = Enrollment::create($request->validated());
         
         $enrollment->load(['user', 'course']);
         
