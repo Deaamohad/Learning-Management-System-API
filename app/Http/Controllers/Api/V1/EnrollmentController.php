@@ -29,7 +29,9 @@ class EnrollmentController extends Controller
             return response()->json(['message' => 'Already enrolled in this course'], 409);
         }
         
-        $enrollment = Enrollment::create($request->validated());
+        $data = $request->validated();
+        $data['user_id'] = auth()->id();
+        $enrollment = Enrollment::create($data);
         
         $enrollment->load(['user', 'course']);
         

@@ -4,51 +4,33 @@ namespace App\Policies;
 
 use App\Models\Course;
 use App\Models\User;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class CoursePolicy
 {
-    use HandlesAuthorization;
-
-    public function before(User $user, $ability)
-    {
-        if ($user->role === 'admin') {
-            return true;
-        }
-    }
-
-    public function viewAny(User $user): bool
+    public function viewAny(?User $user): bool
     {
         return true;
     }
 
-    public function view(User $user, Course $course): bool
+    public function view(?User $user, Course $course): bool
     {
         return true;
     }
 
     public function create(User $user): bool
     {
-        return in_array($user->role, ['instructor', 'admin']);
+        return in_array($user->role, ['admin', 'instructor']);
     }
 
     public function update(User $user, Course $course): bool
     {
-        return $user->role === 'admin' || ($user->role === 'instructor' && $user->id === $course->instructor_id);
+        if ($user->role === 'admin') return true;
+        return $user->role === 'instructor' && $course->instructor_id === $user->id;
     }
 
     public function delete(User $user, Course $course): bool
     {
-        return $user->role === 'admin' || ($user->role === 'instructor' && $user->id === $course->instructor_id);
-    }
-
-    public function restore(User $user, Course $course): bool
-    {
-        return false;
-    }
-
-    public function forceDelete(User $user, Course $course): bool
-    {
-        return false;
+        if ($user->role === 'admin') return true;
+        return $user->role === 'instructor' && $course->instructor_id === $user->id;
     }
 }

@@ -4,41 +4,40 @@ namespace App\Policies;
 
 use App\Models\Enrollment;
 use App\Models\User;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class EnrollmentPolicy
 {
-    use HandlesAuthorization;
-
-    public function before(User $user, $ability)
-    {
-        if ($user->role === 'admin') {
-            return true;
-        }
-    }
-
     public function viewAny(User $user): bool
     {
-        return true;
+        return in_array($user->role, ['admin', 'instructor', 'student']);
     }
 
     public function view(User $user, Enrollment $enrollment): bool
     {
-        return $user->role === 'admin' || $user->id === $enrollment->user_id;
+        if ($user->role === 'admin') return true;
+        if ($user->role === 'student') return $enrollment->user_id === $user->id;
+        if ($user->role === 'instructor') return $enrollment->course && $enrollment->course->instructor_id === $user->id;
+        return false;
     }
 
     public function create(User $user): bool
     {
-        return $user->role === 'student';
+        return in_array($user->role, ['admin', 'student']);
     }
 
     public function update(User $user, Enrollment $enrollment): bool
     {
-        return $user->id === $enrollment->user_id;
+        if ($user->role === 'admin') return true;
+        if ($user->role === 'student') return $enrollment->user_id === $user->id;
+        if ($user->role === 'instructor') return $enrollment->course && $enrollment->course->instructor_id === $user->id;
+        return false;
     }
 
     public function delete(User $user, Enrollment $enrollment): bool
     {
-        return $user->id === $enrollment->user_id;
+        if ($user->role === 'admin') return true;
+        if ($user->role === 'student') return $enrollment->user_id === $user->id;
+        if ($user->role === 'instructor') return $enrollment->course && $enrollment->course->instructor_id === $user->id;
+        return false;
     }
 }
