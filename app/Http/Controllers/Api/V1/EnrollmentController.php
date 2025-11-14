@@ -13,7 +13,18 @@ class EnrollmentController extends Controller
 {
     public function index()
     {
-        $enrollments = Enrollment::with(['user', 'course'])->get();
+        $user = auth()->user();
+        
+        if ($user->role === 'admin') {
+            $enrollments = Enrollment::with(['user', 'course'])->get();
+        } elseif ($user->role === 'instructor') {
+            $enrollments = Enrollment::whereHas('course', function ($query) use ($user) {
+                $query->where('instructor_id', $user->id);
+            })->with(['user', 'course'])->get();
+        } else {
+            $enrollments = $user->enrollments()->with(['user', 'course'])->get();
+        }
+        
         return EnrollmentResource::collection($enrollments);
     }
 
@@ -67,6 +78,12 @@ class EnrollmentController extends Controller
 
     public function courseStudents(Course $course)
     {
+        $user = auth()->user();
+        
+        if ($user->role !== 'admin' && ($user->role !== 'instructor' || $course->instructor_id !== $user->id)) {
+            abort(403, 'Unauthorized');
+        }
+        
         $enrollments = $course->enrollments()->with('user')->get();
         return EnrollmentResource::collection($enrollments);
     }

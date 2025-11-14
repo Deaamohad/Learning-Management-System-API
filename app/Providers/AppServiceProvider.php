@@ -2,26 +2,17 @@
 
 namespace App\Providers;
 
-use App\Models\Category;
-use App\Models\Course;
-use App\Models\Enrollment;
-use App\Policies\CategoryPolicy;
-use App\Policies\CoursePolicy;
-use App\Policies\EnrollmentPolicy;
-use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\ServiceProvider;
 
-class AuthServiceProvider extends ServiceProvider
+class AppServiceProvider extends ServiceProvider
 {
-    protected $policies = [
-        Category::class => CategoryPolicy::class,
-        Course::class => CoursePolicy::class,
-        Enrollment::class => EnrollmentPolicy::class,
-    ];
+    public function register(): void
+    {
+        //
+    }
 
     public function boot(): void
     {
-        $this->registerPolicies();
+        //
     }
 }
-
-

@@ -20,7 +20,13 @@ class CourseController extends Controller
     {
         $this->authorize('create', Course::class);
         
-        $course = Course::create($request->validated());
+        $data = $request->validated();
+        
+        if (auth()->user()->role === 'instructor') {
+            $data['instructor_id'] = auth()->id();
+        }
+        
+        $course = Course::create($data);
         $course->load(['instructor', 'category']);
         
         return new CourseResource($course);
